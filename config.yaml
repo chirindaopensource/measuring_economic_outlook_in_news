@@ -1,0 +1,200 @@
+﻿# ==============================================================================
+# FUSED MASTER CONFIGURATION FOR THE NEOS STUDY REPLICATION
+# ==============================================================================
+# This YAML file contains all non-data-structure input parameters required by
+# the NEOS pipeline. It serves as the single source of truth for configuring
+# the entire study, from data curation to econometric validation.
+# ==============================================================================
+
+master_config:
+  # --------------------------------------------------------------------------
+  # Phase 1: Data Acquisition and Curation
+  # --------------------------------------------------------------------------
+  data_curation_params:
+    start_date: "1999-01-01"
+    end_date: "2025-05-31"
+    included_languages: ["de", "fr"]
+    publication_types_vocab:
+      - "print"
+      - "online"
+      - "radio"
+      - "TV"
+      - "magazine"
+      - "tv_guide"
+      - "other"
+    excluded_publication_types:
+      - "tv_guide"
+      - "magazine"
+      - "radio"
+      - "TV"
+    outlet_allowlist: [] # To be populated with the 158 retained outlet IDs.
+    timezone_policy:
+      store_timezone_aware: true
+      primary_tz: "UTC"
+      source_timezone_field: "publication_timezone"
+
+  # --------------------------------------------------------------------------
+  # Phase 2: Feature Engineering via Semantic Embedding
+  # --------------------------------------------------------------------------
+  embedding_params:
+    model_name: "jinaai/jina-embeddings-v2-base-de" # Updated to a valid Hugging Face model ID
+    embedding_dimension: 1024
+    max_input_tokens: 8192
+    inference_mode: "local"
+    model_hash: "" # To be recorded for audit.
+    tokenizer_version: "" # To be recorded for audit.
+    batch_size: 32 # Set a default batch size.
+    store_token_counts: true
+    truncate_policy: "hard_truncate"
+
+  # --------------------------------------------------------------------------
+  # Phase 3: Relevance Model Construction and Corpus Filtering
+  # --------------------------------------------------------------------------
+  relevance_model_params:
+    positive_class_sections:
+      - "Business"
+      - "Markets"
+      - "Economics"
+      - "Finance"
+      - "Wirtschaft"
+      - "Börse"
+      - "Ökonomie"
+      - "Finanz"
+      - "Économie"
+      - "Marchés"
+      - "Affaires"
+      - "Finance"
+    classification_threshold: 0.5
+    nn_architecture:
+      input_dim: 1024
+      layers:
+        - {type: "Dense", neurons: 256, activation: "ReLU"}
+        - {type: "Dropout", rate: 0.3}
+        - {type: "Dense", neurons: 64, activation: "ReLU"}
+        - {type: "Dense", neurons: 1, activation: "Sigmoid"}
+    training_params:
+      optimizer: "Adam"
+      learning_rate: 0.0005
+      loss_function: "BinaryCrossentropy"
+      class_weight: "balanced"
+      validation_scheme: "temporal"
+      validation_split: 0.2
+      early_stopping_metric: "val_auc"
+      early_stopping_patience: 5
+      probability_calibration: "none"
+
+  # --------------------------------------------------------------------------
+  # Phase 4: Sentiment Model Construction (LLM + Logistic Regression)
+  # --------------------------------------------------------------------------
+  sentiment_model_params:
+    llm_config:
+      model_identifier: "claude-3-5-sonnet-20240620"
+      generation_params:
+        temperature: 0.2
+        top_p: 0.9
+        max_tokens: 1024
+        stop_sequences: []
+        seed: 42
+      appendix_prompt_financial_markets_en: |
+        I want to classify newspaper articles from the business sections of Swiss newspapers (e.g., NZZ, Tagesanzeiger, Handelszeitung) according to whether they give a rather negative or positive outlook for developments on the financial markets. To do this, I use high-dimensional embeddings of the newspaper articles calculated with BERT. I then compare these embeddings with the embeddings of artificially generated newspaper articles that are prototypically positive or negative in terms of the outlook for the financial markets, using cosine similarity.
+
+        For this assignment, write three business articles each on financial and stock markets with a positive and negative outlook (six articles in total) that differ in content. Each article should be approximately 400–500 words long. These articles should simulate realistic business journalism and be diverse in content.
+
+        Requirements:
+
+        Variety of topics: Choose different topics related to the financial markets (e.g., stock and stock market developments (e.g., SMI, SPI, Dow Jones, DAX, etc.), bonds, commodities (e.g., gold, oil), and regulation in the financial sector).
+
+        Style & structure: The articles should be written like realistic journalistic articles, similar to texts from NZZ or Handelszeitung. Use a factual, fact-based writing style with typical business journalism phrasing.
+
+        Clear polarization: The positive articles should present optimistic economic developments. The negative articles should highlight pessimistic developments. The economic perspective (positive or negative) must be clearly recognizable without appearing exaggerated or unrealistic.
+
+        Embedding-friendly wording: Use key economic terms and technical terminology to achieve the highest possible selectivity of embeddings between positive and negative articles. Use a mixture of quantitative data (figures, statistics) and qualitative economic assessments. Vary sentence structures and wording between positive and negative articles to avoid bias in the classification.
+
+        These articles should serve as reference points to better classify real newspaper articles using cosine similarity.
+      topic_parameterized_prompt_template_en: |
+        Use the exact structure and requirements of the Appendix financial-markets prompt above, but replace the domain with: {AREA}. Maintain length (400–500 words), journalistic style, clear positive/negative polarization, embedding-friendly wording, and topic variety appropriate to {AREA} (e.g., labor market, trade, regulation). Generate balanced sets of positive and negative articles.
+      logging_policy:
+        store_full_prompts: true
+        store_full_responses: true
+        store_model_version: true
+        store_decoding_params: true
+    synthetic_dataset_config:
+      num_articles_total: 256
+      num_positive_articles: 128
+      num_negative_articles: 128
+      article_word_count_target: "400-500"
+      domain_coverage: ["financial_markets", "labor_market", "trade", "regulation"]
+    classifier_config:
+      model_type: "LogisticRegression"
+      penalty: "l2"
+      solver: "lbfgs"
+      cross_validation_folds: 5
+      hyperparameter_grid:
+        C: [0.001, 0.01, 0.1, 1, 10, 100, 1000]
+      feature_scaling: "none"
+      class_weight: null
+
+  # --------------------------------------------------------------------------
+  # Phase 5: Indicator Aggregation
+  # --------------------------------------------------------------------------
+  aggregation_params:
+    main_indicator_frequency: "monthly"
+    early_release_variants_days: [7, 14, 21]
+    min_articles_per_month: 1
+    handle_zero_article_months: "nan"
+    month_to_date_series: true
+
+  # --------------------------------------------------------------------------
+  # Phase 6: Econometric Validation
+  # --------------------------------------------------------------------------
+  econometric_validation_params:
+    dependent_variable: "yoy_gdp_growth_sports_adj"
+    forecast_horizons_quarters: [0, 1, 2]
+    poos_initial_window_quarters: 8
+    poos_window_type: "expanding"
+    benchmark_model_specification: "AR(1)"
+    indicator_model_specification: "y_{t+h} = α + β y_{t-1} + γ x_t^{(m)} + ε_t"
+    information_set_policy:
+      use_month_m_for_quarter_t: {baseline: 2, early_neos: 3}
+      monthly_to_quarterly_for_corrs: "simple_three_month_average"
+    significance_test_config:
+      test_name: "Diebold-Mariano"
+      modification: "HAC standard errors"
+      hac_estimator: "Newey-West"
+      kernel: "Bartlett"
+      bandwidth_q: null
+      small_sample_adjustment: true
+    overlapping_forecasts: true
+    evaluation_windows_by_indicator:
+      service_pmi: {start_quarter: "2014-01-01", end_quarter: null}
+      kof_biz_situation: {start_quarter: "2009-04-01", end_quarter: null}
+
+  # --------------------------------------------------------------------------
+  # Phase 7: Baseline Comparator (Lexicon) and Diagnostics
+  # --------------------------------------------------------------------------
+  lexicon_config:
+    source: "Barbaglia et al. (2025), English"
+    translation_language: "de"
+    tokenization_rules: "whitespace + punctuation-preserving"
+    negation_handling: "none"
+    article_score_formula: "per Barbaglia et al. (2025)"
+    aggregation: "monthly_mean_over_articles"
+  umap_diagnostic_params:
+    apply_to: "synthetic_embeddings"
+    n_neighbors: 15 # A sensible default
+    min_dist: 0.1   # A sensible default
+    random_state: 42
+
+  # --------------------------------------------------------------------------
+  # Phase 8: Reproducibility and Provenance
+  # --------------------------------------------------------------------------
+  reproducibility:
+    random_seeds: {global_seed: 42}
+    artifact_registry:
+      embeddings_store: ""
+      relevance_model_store: ""
+      sentiment_model_store: ""
+      indicator_series_store: ""
+      forecast_results_store: ""
+    store_hashes: true
+    log_all_parameters: true
