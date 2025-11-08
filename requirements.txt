@@ -1,0 +1,285 @@
+﻿# ==============================================================================
+# Requirements File for NEOS Economic Sentiment Pipeline
+# ==============================================================================
+#
+# Project: Measuring Economic Outlook in the News Timely and Efficiently
+# Reference: Beck et al. (2025) - arXiv:2511.04299
+# Author: CS Chirinda
+# Python Version: >=3.9,<3.12
+#
+# Installation Instructions:
+#   pip install --upgrade pip
+#   pip install -r requirements.txt
+#
+# Note: For GPU acceleration (recommended for production):
+#   - Install PyTorch with CUDA support first:
+#     pip install torch==2.1.2 --index-url https://download.pytorch.org/whl/cu118
+#   - Then install remaining requirements
+#
+# ==============================================================================
+
+# --- Core Scientific Computing Stack ---
+# Pinned for numerical stability and reproducibility
+numpy==1.26.4
+pandas==2.1.4
+scipy==1.11.4
+
+# --- Deep Learning Frameworks ---
+# PyTorch: Primary framework for transformer models
+# Note: CPU version specified; override with CUDA build for production
+torch==2.1.2
+
+# TensorFlow: Required by some statsmodels components and potential preprocessing
+# Using TensorFlow 2.15.x for Python 3.11 compatibility
+tensorflow==2.15.0
+# TensorFlow CPU optimization
+tensorflow-io-gfile-system==0.36.0
+
+# --- Natural Language Processing ---
+# sentence-transformers: Wrapper for transformer-based embeddings
+# Includes transformers, tokenizers, and huggingface-hub as dependencies
+sentence-transformers==2.3.1
+
+# Explicit dependencies for sentence-transformers (ensuring compatibility)
+transformers==4.36.2
+tokenizers==0.15.0
+huggingface-hub==0.20.2
+
+# --- Machine Learning & Model Persistence ---
+# scikit-learn: Logistic regression, cross-validation, metrics
+scikit-learn==1.3.2
+
+# joblib: Efficient model serialization (used by sklearn)
+joblib==1.3.2
+
+# UMAP: Dimensionality reduction for embeddings visualization
+umap-learn==0.5.5
+
+# numba: Required by UMAP for JIT compilation
+numba==0.58.1
+
+# --- LLM API Integration ---
+# Anthropic: Claude API for synthetic sentiment data generation
+anthropic==0.18.1
+
+# httpx: Async HTTP client (dependency of anthropic)
+httpx==0.26.0
+
+# --- Econometrics & Statistical Analysis ---
+# statsmodels: Time series models, hypothesis testing, regression
+statsmodels==0.14.1
+
+# patsy: Formula parser for statsmodels
+patsy==0.5.6
+
+# --- Data Storage & Serialization ---
+# h5py: HDF5 for efficient out-of-core embedding storage
+h5py==3.10.0
+
+# --- Visualization ---
+# matplotlib: Publication-quality plots
+matplotlib==3.8.2
+
+# seaborn: Statistical visualization
+seaborn==0.13.1
+
+# --- Progress Tracking & UI ---
+# tqdm: Progress bars for long-running operations
+tqdm==4.66.1
+
+# --- Additional Utility Dependencies ---
+# These are often pulled in transitively but pinned for reproducibility
+
+# typing-extensions: Backport of typing features for Python 3.9
+typing-extensions==4.9.0
+
+# certifi: SSL certificate bundle for secure API calls
+certifi==2024.2.2
+
+# charset-normalizer: Character encoding detection
+charset-normalizer==3.3.2
+
+# idna: Internationalized domain names support
+idna==3.6
+
+# urllib3: HTTP client (used by requests/httpx)
+urllib3==2.1.0
+
+# requests: HTTP library (used by various packages)
+requests==2.31.0
+
+# python-dateutil: Date parsing utilities
+python-dateutil==2.8.2
+
+# pytz: Timezone definitions
+pytz==2024.1
+
+# six: Python 2/3 compatibility (legacy dependency)
+six==1.16.0
+
+# packaging: Version parsing and comparison
+packaging==23.2
+
+# pyparsing: Parser for matplotlib
+pyparsing==3.1.1
+
+# cycler: Color cycle management for matplotlib
+cycler==0.12.1
+
+# kiwisolver: Constraint solver for matplotlib layout
+kiwisolver==1.4.5
+
+# pillow: Image processing (matplotlib backend)
+Pillow==10.2.0
+
+# fonttools: Font utilities for matplotlib
+fonttools==4.47.2
+
+# contourpy: Contour plotting for matplotlib
+contourpy==1.2.0
+
+# threadpoolctl: Thread pool control for numerical libraries
+threadpoolctl==3.2.0
+
+# protobuf: Protocol buffers (TensorFlow dependency)
+protobuf==4.23.4
+
+# wrapt: Decorators for TensorFlow
+wrapt==1.14.1
+
+# gast: AST for TensorFlow
+gast==0.4.0
+
+# astunparse: AST unparsing for TensorFlow
+astunparse==1.6.3
+
+# opt-einsum: Optimized einsum for TensorFlow
+opt-einsum==3.3.0
+
+# termcolor: Colored terminal output for TensorFlow
+termcolor==2.4.0
+
+# flatbuffers: Serialization for TensorFlow Lite
+flatbuffers==23.5.26
+
+# ml-dtypes: NumPy dtype extensions for ML
+ml-dtypes==0.2.0
+
+# absl-py: Abseil Python common libraries (TensorFlow)
+absl-py==2.1.0
+
+# tensorboard: TensorFlow visualization toolkit
+tensorboard==2.15.1
+
+# tensorboard-data-server: Backend for TensorBoard
+tensorboard-data-server==0.7.2
+
+# werkzeug: WSGI utility library (TensorBoard dependency)
+werkzeug==3.0.1
+
+# markdown: Markdown parser (TensorBoard)
+markdown==3.5.2
+
+# grpcio: gRPC framework (TensorFlow)
+grpcio==1.60.0
+
+# google-auth: Google authentication (TensorBoard)
+google-auth==2.27.0
+
+# google-auth-oauthlib: OAuth for Google Auth
+google-auth-oauthlib==1.2.0
+
+# cachetools: Caching utilities
+cachetools==5.3.2
+
+# pyasn1: ASN.1 parser (Google Auth dependency)
+pyasn1==0.5.1
+
+# pyasn1-modules: ASN.1 modules
+pyasn1-modules==0.3.0
+
+# rsa: RSA cryptography (Google Auth)
+rsa==4.9
+
+# oauthlib: OAuth implementation
+oauthlib==3.2.2
+
+# requests-oauthlib: OAuth for requests
+requests-oauthlib==1.3.1
+
+# llvmlite: LLVM compiler for Numba
+llvmlite==0.41.1
+
+# pynndescent: Nearest neighbor descent (UMAP dependency)
+pynndescent==0.5.11
+
+# tbb: Threading building blocks (scikit-learn acceleration)
+tbb==2021.11.0
+
+# sniffio: Async library detection (httpx)
+sniffio==1.3.0
+
+# anyio: Async I/O abstraction (httpx)
+anyio==4.2.0
+
+# h11: HTTP/1.1 protocol (httpx)
+h11==0.14.0
+
+# httpcore: HTTP protocol implementation (httpx)
+httpcore==1.0.2
+
+# distro: Linux distribution detection (anthropic)
+distro==1.9.0
+
+# annotated-types: Type annotations (pydantic dependency)
+annotated-types==0.6.0
+
+# pydantic: Data validation (anthropic dependency)
+pydantic==2.5.3
+
+# pydantic-core: Core validation logic
+pydantic-core==2.14.6
+
+# regex: Enhanced regex support (transformers)
+regex==2023.12.25
+
+# safetensors: Safe tensor serialization (transformers)
+safetensors==0.4.1
+
+# pyyaml: YAML parser (transformers config files)
+PyYAML==6.0.1
+
+# fsspec: Filesystem specification (huggingface-hub)
+fsspec==2023.12.2
+
+# filelock: Platform-independent file locking
+filelock==3.13.1
+
+# sympy: Symbolic mathematics (PyTorch)
+sympy==1.12
+
+# networkx: Graph library (PyTorch)
+networkx==3.2.1
+
+# jinja2: Template engine (PyTorch)
+jinja2==3.1.3
+
+# markupsafe: Safe string handling (Jinja2)
+MarkupSafe==2.1.4
+
+# mpmath: Pure Python math library (sympy)
+mpmath==1.3.0
+
+# --- Development & Quality Assurance (Optional) ---
+# Uncomment for development environments
+# pytest==7.4.3
+# pytest-cov==4.1.0
+# black==23.12.1
+# flake8==7.0.0
+# mypy==1.8.0
+# isort==5.13.2
+# pylint==3.0.3
+
+# ==============================================================================
+# End of Requirements
+# ==============================================================================
